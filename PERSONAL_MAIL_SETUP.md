@@ -12,7 +12,7 @@
 
 ## 推荐架构
 
-Namecheap 持有域名；将域名的权威 DNS 改为 Cloudflare（无需转移注册商）。Cloudflare Email Routing 将 `@xiaolinyx.me` 的来信送到 Worker；Worker 使用 D1 保存邮件元数据、KV 保存设置，附件建议存 R2；网页端由同一个 Worker 提供。初期站外发信选择 Resend，现有代码已支持按域名配置 API Key；Cloudflare Email Sending 可作为后续替代。Resend 免费计划当前限每天 100 封，全站代码先按 80 个收件人保守限流。
+Namecheap 持有域名；将域名的权威 DNS 改为 Cloudflare（无需转移注册商）。Cloudflare Email Routing 将 `@xiaolinyx.me` 的来信送到 Worker；Worker 使用 D1 保存邮件元数据、KV 保存设置，附件建议存 R2；网页端由同一个 Worker 提供。初期站外发信选择 Resend，代码优先读取 Worker Secret `RESEND_API_KEY`，也兼容后台按域名配置 API Key；Cloudflare Email Sending 可作为后续替代。Resend 免费计划当前限每天 100 封，全站代码先按 80 个收件人保守限流。
 
 这个基座提供网页端邮箱，不提供原生 IMAP/POP3 收件服务。Outlook、Apple Mail、Thunderbird 等客户端不能直接把它当作完整邮箱账户添加。若以后必须支持这些客户端，需要另接邮件服务器或改用完整邮箱托管方案。
 
@@ -32,7 +32,7 @@ Namecheap 持有域名；将域名的权威 DNS 改为 Cloudflare（无需转移
 5. 运行 `python3 scripts/bootstrap-admin.py`，交互式输入初始化密钥和新管理员密码。管理员地址必须由此方式创建，访客不能抢注。然后登录网页端。
 6. 在 Cloudflare 创建 Turnstile 站点密钥与密钥；在网页管理设置中填入两者，注册验证选择“始终启用”，最后打开公开注册。没有配置 Turnstile 时，后端会拒绝开启公开注册。
 7. 验证两个普通账号能够各自登录和收信，不能看见对方收件箱；普通账号默认每天最多发 10 封，最多添加 3 个地址。
-8. 配置并验证发信服务，给外部 Gmail/Outlook 地址发测试信并回复，检查退信及 SPF/DKIM/DMARC 结果。未配置发信服务时，普通账号不能向外发件。
+8. 在 Resend 验证 `xiaolinyx.me` 发信域名，并用 `pnpm exec wrangler secret put RESEND_API_KEY` 输入 API Key。配置并验证发信服务，给外部 Gmail/Outlook 地址发测试信并回复，检查退信及 SPF/DKIM/DMARC 结果。未配置发信服务时，普通账号不能向外发件。
 9. 注意 Resend 的可接受使用政策禁止垃圾邮件和未经请求的邮件。公开邮箱网站不能保证任意访客的任意对外邮件都符合其政策；对外开放前应设置滥用举报和停号流程，并与服务商确认这种用途。
 10. 定期备份 D1 和附件存储；为 Cloudflare、Namecheap 和发信服务开启双重验证，并注意域名续费。
 
