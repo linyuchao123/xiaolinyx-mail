@@ -4,7 +4,7 @@
 
 ## 当前状态
 
-- 源码已导入，域名已接入 Cloudflare；尚未绑定 D1/KV 或部署 Worker。
+- 源码已导入，域名已接入 Cloudflare；Resend 已确认 `xiaolinyx.me` 发信域名为 Verified（东京区域），三条 DKIM/SPF 验证记录已通过。尚未绑定 D1/KV 或部署 Worker。
 - 已在 Wrangler 配置域名和管理员地址。普通用户默认每天最多向 10 个收件人发信、最多拥有 3 个邮箱地址；使用 Resend 时，全站站外发信额外限制为每天 80 个收件人。
 - 已将数据库初始化接口改为 `POST /api/init`，密钥通过 `X-Init-Secret` 请求头传送，避免把密钥放进浏览器历史和 URL 日志。
 - 上游 GitHub Actions 部署模板会把 JWT 密钥写入普通变量，已移除。先从本机部署，密钥使用 Worker Secret 注入。
@@ -40,7 +40,7 @@ Namecheap 持有域名；将域名的权威 DNS 改为 Cloudflare（无需转移
 
 - 本机 Wrangler 尚未登录 Cloudflare。浏览器 OAuth 页面申请了过宽的账户权限，已取消；优先由你在 Cloudflare 创建限定到本项目资源的 API Token，再通过本机 `CLOUDFLARE_API_TOKEN` 临时使用，不要把 Token 发到聊天或写入仓库。
 - 创建 D1、KV，并决定是否启用 R2。
-- 已选择 Resend。需要你开通账号、验证 `xiaolinyx.me` 域名，并配置 API Key；先核对其可接受使用政策是否允许向公开注册用户提供普通邮件发件服务。
+- Resend 账号和 `xiaolinyx.me` 发信域名已验证；仍需创建仅限该域名发信的 API Key，并作为 Worker Secret 配置；先核对其可接受使用政策是否允许向公开注册用户提供普通邮件发件服务。
 - 附件读取现在按登录账号校验归属；不要为 R2 Bucket 开放公开域名。正式开放前仍需做跨账号隔离验证。
 - 当前只开发网页端；若以后需要 IMAP/POP3，需另行扩展架构。
 
