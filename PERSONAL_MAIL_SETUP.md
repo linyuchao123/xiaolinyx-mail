@@ -7,7 +7,7 @@
 - 源码已导入，域名已接入 Cloudflare；尚未绑定 D1/KV 或部署 Worker。
 - 已在 Wrangler 配置域名和管理员地址。普通用户默认每天最多向 10 个收件人发信、最多拥有 3 个邮箱地址；使用 Resend 时，全站站外发信额外限制为每天 80 个收件人。
 - 已将数据库初始化接口改为 `POST /api/init`，密钥通过 `X-Init-Secret` 请求头传送，避免把密钥放进浏览器历史和 URL 日志。
-- GitHub Actions 暂时只允许手动触发。配置好资源和 Secrets 后再运行。
+- 上游 GitHub Actions 部署模板会把 JWT 密钥写入普通变量，已移除。先从本机部署，密钥使用 Worker Secret 注入。
 - 仓库是公开的。Cloudflare API Token、JWT_SECRET、Resend API Key 等只能放在 GitHub Secrets、Cloudflare Worker Secrets 或项目后台，不能提交到 Git。
 
 ## 推荐架构
