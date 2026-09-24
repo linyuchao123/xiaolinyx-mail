@@ -29,3 +29,4 @@ git-tools.js
 .dev.vars
 .dev.vars.*
 mail-worker/wrangler-local.toml
+mail-worker/.admin-credentials

@@ -4,7 +4,7 @@
 
 ## 当前状态
 
-- 源码已导入，域名已接入 Cloudflare；Resend 已确认 `xiaolinyx.me` 发信域名为 Verified（东京区域），三条 DKIM/SPF 验证记录已通过。尚未绑定 D1/KV 或部署 Worker。
+- 源码已导入，域名已接入 Cloudflare；Resend 已确认 `xiaolinyx.me` 发信域名为 Verified（东京区域），三条 DKIM/SPF 验证记录已通过。Worker 已部署到 `https://mail.xiaolinyx.me`，Safari 已验证打开登录页；D1/KV 已初始化，正式 D1 中有 `admin@xiaolinyx.me` 管理员记录。管理员随机密码仅保存在本机 `mail-worker/.admin-credentials`，JWT 密钥仅保存在 Git 忽略的 `mail-worker/.dev.vars` 并注入 Worker Secret。
 - 已在 Wrangler 配置域名和管理员地址。普通用户默认每天最多向 10 个收件人发信、最多拥有 3 个邮箱地址；使用 Resend 时，全站站外发信额外限制为每天 80 个收件人。
 - 已将数据库初始化接口改为 `POST /api/init`，密钥通过 `X-Init-Secret` 请求头传送，避免把密钥放进浏览器历史和 URL 日志。
 - 上游 GitHub Actions 部署模板会把 JWT 密钥写入普通变量，已移除。先从本机部署，密钥使用 Worker Secret 注入。
@@ -19,29 +19,29 @@ Namecheap 持有域名；将域名的权威 DNS 改为 Cloudflare（无需转移
 ## 域名与 DNS
 
 1. 在 Cloudflare 添加 `xiaolinyx.me`，按 Cloudflare 给出的两条 NS 记录到 Namecheap 的域名管理页替换 nameserver。保留 Namecheap 作为注册商。
-2. 当前 MX 指向 Namecheap 的 eforward 转发服务。先部署并验证 Worker，再在 Cloudflare Email Routing 为 `xiaolinyx.me` 启用收件，将收件规则指向本项目的 Worker；届时替换旧 MX/SPF。
+2. 当前 MX 仍指向 Namecheap 的 5 条 `eforward*.registrar-servers.com` 转发服务。Cloudflare Catch-all 已设为发送到 `xiaolinyx-mail` Worker，但 Email Routing 仍未启用；启用接口报 `Non-Cloudflare MX records exist`。切换前先移除旧 MX，接着启用 Email Routing，让 Cloudflare 自动添加其 MX/SPF/DKIM；核查根域只有一条 SPF TXT。切换期间现有 Namecheap 转发将停止。
 3. 在 Worker 配置自定义域名 `mail.xiaolinyx.me`。不要把邮箱 MX 指向这个网页域名。
 4. 发信服务会给出 SPF、DKIM、DMARC 所需 DNS 记录；逐项按服务商的实际值添加，不要复制示例值。发信域验证通过后再测试外部收件箱。
 
 ## Cloudflare 资源与部署
 
-1. 创建 D1 数据库、KV Namespace；若要长期保存附件，创建 R2 Bucket。记录各自 ID 和名称。
-2. 在 `mail-worker/wrangler.toml` 填入 `db`、`kv`、可选的 `r2` 绑定。域名、管理员和自定义域名已配置；不要在 `[vars]` 写入真实 `jwt_secret`。
-3. 安装依赖并从 `mail-worker` 目录执行 `pnpm run deploy`。部署后用 `pnpm exec wrangler secret put jwt_secret` 安全录入一串高强度随机值。
-4. 初始化数据库：向 `https://mail.xiaolinyx.me/api/init` 发送 POST，请求头 `X-Init-Secret` 填入刚设置的密钥。不要把真实密钥写在命令行参数或仓库。
-5. 运行 `python3 scripts/bootstrap-admin.py`，交互式输入初始化密钥和新管理员密码。管理员地址必须由此方式创建，访客不能抢注。然后登录网页端。
+1. D1 数据库 `xiaolinyx-mail` 和 KV Namespace `xiaolinyx-mail-kv` 已创建；若要长期保存较大附件，再创建 R2 Bucket。
+2. `mail-worker/wrangler.toml` 已填入 `db`、`kv` 绑定；R2 仍为可选。域名、管理员和自定义域名已配置；不要在 `[vars]` 写入真实 `jwt_secret`。
+3. Worker 已部署并已注入 `jwt_secret` Secret。后续代码更新从 `mail-worker` 目录执行 `pnpm exec wrangler deploy`。
+4. 正式 D1/KV 已初始化。由于本机终端直连站点时 TLS 被重置，初始化是在隔离的本地 D1 中运行后通过 Wrangler 分批导入正式 D1，并把默认设置写入正式 KV。
+5. 正式管理员账户已通过项目注册逻辑创建并迁移。账户为 `admin@xiaolinyx.me`，密码保存在 Git 忽略的 `mail-worker/.admin-credentials`（文件权限 600）；请在本机查看并登录网页端。访客不能抢注此地址。
 6. 在 Cloudflare 创建 Turnstile 站点密钥与密钥；在网页管理设置中填入两者，注册验证选择“始终启用”，最后打开公开注册。没有配置 Turnstile 时，后端会拒绝开启公开注册。
 7. 验证两个普通账号能够各自登录和收信，不能看见对方收件箱；普通账号默认每天最多发 10 封，最多添加 3 个地址。
 8. 在 Resend 验证 `xiaolinyx.me` 发信域名，并用 `pnpm exec wrangler secret put RESEND_API_KEY` 输入 API Key。配置并验证发信服务，给外部 Gmail/Outlook 地址发测试信并回复，检查退信及 SPF/DKIM/DMARC 结果。未配置发信服务时，普通账号不能向外发件。
 9. 注意 Resend 的可接受使用政策禁止垃圾邮件和未经请求的邮件。公开邮箱网站不能保证任意访客的任意对外邮件都符合其政策；对外开放前应设置滥用举报和停号流程，并与服务商确认这种用途。
 10. 定期备份 D1 和附件存储；为 Cloudflare、Namecheap 和发信服务开启双重验证，并注意域名续费。
 
-## 部署前待办
+## 尚未完成
 
-- 本机 Wrangler 尚未登录 Cloudflare。浏览器 OAuth 页面申请了过宽的账户权限，已取消；优先由你在 Cloudflare 创建限定到本项目资源的 API Token，再通过本机 `CLOUDFLARE_API_TOKEN` 临时使用，不要把 Token 发到聊天或写入仓库。
-- 创建 D1、KV，并决定是否启用 R2。
-- Resend 账号和 `xiaolinyx.me` 发信域名已验证；仍需创建仅限该域名发信的 API Key，并作为 Worker Secret 配置；先核对其可接受使用政策是否允许向公开注册用户提供普通邮件发件服务。
-- 附件读取现在按登录账号校验归属；不要为 R2 Bucket 开放公开域名。正式开放前仍需做跨账号隔离验证。
-- 当前只开发网页端；若以后需要 IMAP/POP3，需另行扩展架构。
+- Cloudflare Email Routing 尚未启用。Catch-all 已指向 Worker，但 5 条旧 Namecheap MX 与启用操作冲突；Wrangler OAuth 没有 DNS 记录权限，需在 Cloudflare DNS 中移除旧 MX 后再启用并验证自动生成的 Cloudflare MX/SPF/DKIM。
+- Resend 域名已验证；尚需创建仅限 `xiaolinyx.me` 发信的 API Key，并存入 Worker Secret `RESEND_API_KEY`。不能把 Key 发到聊天或提交 Git。先核对 Resend 政策是否允许公开注册用户的普通邮件发件。
+- 在 Cloudflare 创建 Turnstile，并在站点管理设置中配置 site key / secret key，选择始终验证，再开启公开注册；目前注册关闭。
+- 管理员网页登录、真实收件、站外发件以及跨账号隔离仍需线上实测。附件读取已校验账号归属，不应给 R2 Bucket 开放公开域名。
+- 当前仅有网页端，IMAP/POP3 需要额外架构。
 
 参考：[Cloud Mail 部署文档](https://doc.skymail.ink/guide/command)、[Cloudflare Email Routing](https://developers.cloudflare.com/email-service/get-started/route-emails/)、[Cloudflare Email Sending](https://developers.cloudflare.com/email-service/)、[Namecheap 域名管理](https://www.namecheap.com/support/knowledgebase/category/2137/domains/)。
