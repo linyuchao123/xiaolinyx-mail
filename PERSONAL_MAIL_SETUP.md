@@ -19,7 +19,7 @@ Namecheap 持有域名；将域名的权威 DNS 改为 Cloudflare（无需转移
 ## 域名与 DNS
 
 1. 在 Cloudflare 添加 `xiaolinyx.me`，按 Cloudflare 给出的两条 NS 记录到 Namecheap 的域名管理页替换 nameserver。保留 Namecheap 作为注册商。
-2. 当前 MX 仍指向 Namecheap 的 5 条 `eforward*.registrar-servers.com` 转发服务。Cloudflare Catch-all 已设为发送到 `xiaolinyx-mail` Worker，但 Email Routing 仍未启用；启用接口报 `Non-Cloudflare MX records exist`。切换前先移除旧 MX，接着启用 Email Routing，让 Cloudflare 自动添加其 MX/SPF/DKIM；核查根域只有一条 SPF TXT。切换期间现有 Namecheap 转发将停止。
+2. 已移除 Namecheap 的 5 条 `eforward*.registrar-servers.com` MX 和旧 SPF。Cloudflare Email Routing 已启用且状态为 `ready`；根域的 3 条 MX 指向 `route*.mx.cloudflare.net`，唯一 SPF 为 `v=spf1 include:_spf.mx.cloudflare.net ~all`。Catch-all 已指向 `xiaolinyx-mail` Worker。原 Namecheap 转发已停止。
 3. 在 Worker 配置自定义域名 `mail.xiaolinyx.me`。不要把邮箱 MX 指向这个网页域名。
 4. 发信服务会给出 SPF、DKIM、DMARC 所需 DNS 记录；逐项按服务商的实际值添加，不要复制示例值。发信域验证通过后再测试外部收件箱。
 
@@ -38,7 +38,7 @@ Namecheap 持有域名；将域名的权威 DNS 改为 Cloudflare（无需转移
 
 ## 尚未完成
 
-- Cloudflare Email Routing 尚未启用。Catch-all 已指向 Worker，但 5 条旧 Namecheap MX 与启用操作冲突；Wrangler OAuth 没有 DNS 记录权限，需在 Cloudflare DNS 中移除旧 MX 后再启用并验证自动生成的 Cloudflare MX/SPF/DKIM。
+- Cloudflare Email Routing 与公开 DNS 已就绪；仍需通过外部邮箱发送真实测试信，验证 Worker 收信并在网页端显示。
 - Resend 域名已验证；尚需创建仅限 `xiaolinyx.me` 发信的 API Key，并存入 Worker Secret `RESEND_API_KEY`。不能把 Key 发到聊天或提交 Git。先核对 Resend 政策是否允许公开注册用户的普通邮件发件。
 - 在 Cloudflare 创建 Turnstile，并在站点管理设置中配置 site key / secret key，选择始终验证，再开启公开注册；目前注册关闭。
 - 管理员网页登录、真实收件、站外发件以及跨账号隔离仍需线上实测。附件读取已校验账号归属，不应给 R2 Bucket 开放公开域名。
