@@ -19,6 +19,14 @@ import dayjs from 'dayjs';
 import { toUtc } from '../utils/date-uitil';
 import { t } from '../i18n/i18n.js';
 import verifyRecordService from './verify-record-service';
+import reqUtils from '../utils/req-utils';
+
+const RESERVED_MAILBOXES = new Set([
+	'admin', 'administrator', 'abuse', 'postmaster', 'hostmaster',
+	'webmaster', 'security', 'support', 'root', 'mailer-daemon',
+	'noreply', 'no-reply'
+]);
+const MAX_REGISTRATIONS_PER_IP_PER_DAY = 5;
 
 const loginService = {
 
@@ -53,6 +61,10 @@ const loginService = {
 
 		if (!verifyUtils.isEmail(email)) {
 			throw new BizError(t('notEmail'));
+		}
+
+		if (!isBootstrap && RESERVED_MAILBOXES.has(emailUtils.getName(email))) {
+			throw new BizError(t('reservedEmailAddress'), 403);
 		}
 
 		if (emailUtils.getName(email).length < minEmailPrefix) {
@@ -141,6 +153,19 @@ const loginService = {
 			regVerifyOpen = await verifyRecordService.isOpenRegVerify(c, regVerifyCount);
 			if (regVerifyOpen) {
 				await turnstileService.verify(c,token)
+			}
+		}
+
+		if (!isBootstrap) {
+			const ip = reqUtils.getIp(c);
+			if (ip === 'Unknown') {
+				throw new BizError(t('registrationIpRequired'), 403);
+			}
+			const row = await c.env.db.prepare(
+				"SELECT COUNT(*) AS total FROM user WHERE create_ip = ? AND create_time >= datetime('now', '-1 day')"
+			).bind(ip).first();
+			if ((row?.total || 0) >= MAX_REGISTRATIONS_PER_IP_PER_DAY) {
+				throw new BizError(t('registrationRateLimited'), 429);
 			}
 		}
 
