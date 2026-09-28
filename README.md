@@ -30,15 +30,19 @@
 </p>
 ## Xiaolinyx Mail
 
-**[打开邮箱](https://mail.xiaolinyx.me)** · [观看界面演示视频](doc/demo/xiaolinyx/overview.mov) · [查看原项目 Cloud Mail](https://github.com/maillab/cloud-mail)
+**[打开邮箱](https://mail.xiaolinyx.me)** · [观看界面演示视频](#操作演示) · [查看原项目 Cloud Mail](https://github.com/maillab/cloud-mail)
 
 一个能用自己的名字创建邮箱地址的地方。你可以在这里注册 `@xiaolinyx.me` 邮箱，收发邮件、保存草稿、标记重要来信，并在个人设置里上传头像。界面适配桌面和手机，登录页的小角色会随着输入和鼠标移动做出回应。
 
+### 操作演示
+
+https://github.com/user-attachments/assets/666d8a18-e22c-417c-b3e6-d9c83acc12bf
+
+点击播放器即可在线预览；也可以[下载原画质录屏](doc/demo/xiaolinyx/overview.mov)。
+
 ### 看看现在的界面
 
-[![Xiaolinyx Mail 登录与注册界面](doc/demo/xiaolinyx/login.png)](doc/demo/xiaolinyx/overview.mov)
-
-点击上图可打开完整操作录屏。若浏览器没有直接播放，请下载视频后观看。
+![Xiaolinyx Mail 登录与注册界面](doc/demo/xiaolinyx/login.png)
 
 | 收件箱：集中查看来信 | 已发送：回顾寄出的邮件 |
 | --- | --- |
@@ -181,5 +185,4 @@ cloud-mail
 ## 交流
 
 [Telegram](https://t.me/cloud_mail_tg)
-
 
