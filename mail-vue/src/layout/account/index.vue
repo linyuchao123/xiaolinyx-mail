@@ -67,7 +67,7 @@
         </template>
 
         <div class="noLoading" v-if="noLoading && accounts.length > 0">
-          <div>{{ $t('noMoreData') }}</div>
+          <div>{{ $t('allAddressesShown') }}</div>
         </div>
         <div class="empty" v-if="noLoading && accounts.length === 0">
           <el-empty :description="$t('noMessagesFound')"/>

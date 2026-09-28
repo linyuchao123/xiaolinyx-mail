@@ -46,6 +46,7 @@
                            :min-width="emailWidth">
             <template #default="props">
               <div style="display: flex;gap: 5px;align-items: center">
+                <UserAvatar :src="props.row.uploadedAvatar" :fallback-src="props.row.avatar" :email="props.row.email" :size="30" />
                 <div class="email-row">{{ props.row.email }}</div>
                 <template v-if="oauthPlatform(props.row)">
                   <el-avatar v-if="oauthPlatform(props.row).iconType === 'image'"
@@ -377,7 +378,7 @@
 </template>
 
 <script setup>
-import {defineOptions, h, reactive, ref, watch} from 'vue'
+import {defineOptions, h, reactive, ref, watch, onMounted, onUnmounted} from 'vue'
 import {
   userList,
   userDelete,
@@ -398,6 +399,7 @@ import {useSettingStore} from "@/store/setting.js";
 import {isEmail} from "@/utils/verify-utils.js";
 import {useRoleStore} from "@/store/role.js";
 import {useUserStore} from "@/store/user.js";
+import UserAvatar from '@/components/user-avatar/index.vue';
 import {useI18n} from 'vue-i18n';
 
 defineOptions({
@@ -539,10 +541,20 @@ const filterItem = reactive({
   receive: ['normal', 'del']
 })
 
-window.addEventListener('wheel', (event) => {
+function handleWheel() {
   if (dropdownShow.value) {
-    dropdownRef.value.handleClose();
+    dropdownRef.value?.handleClose();
   }
+}
+
+onMounted(() => {
+  window.addEventListener('wheel', handleWheel)
+  window.addEventListener('resize', adjustWidth)
+})
+
+onUnmounted(() => {
+  window.removeEventListener('wheel', handleWheel)
+  window.removeEventListener('resize', adjustWidth)
 })
 
 function visibleChange(e) {
@@ -1042,10 +1054,6 @@ function getUserList(loading = true) {
     }, 200)
   })
 }
-
-window.onresize = () => {
-  adjustWidth()
-};
 
 adjustWidth()
 

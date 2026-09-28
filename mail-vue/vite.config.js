@@ -1,6 +1,7 @@
 import {defineConfig, loadEnv} from 'vite'
 import vue from '@vitejs/plugin-vue'
 import path from 'path'
+import {fileURLToPath} from 'url'
 import AutoImport from 'unplugin-auto-import/vite'
 import Components from 'unplugin-vue-components/vite'
 import {ElementPlusResolver} from 'unplugin-vue-components/resolvers'
@@ -9,6 +10,7 @@ import {VitePWA} from 'vite-plugin-pwa';
 export default defineConfig(({mode}) => {
     const env = loadEnv(mode, process.cwd(), 'VITE')
     return {
+        cacheDir: process.env.VITE_CACHE_DIR || 'node_modules/.vite',
         server: {
             host: true,
             port: 3001,
@@ -48,7 +50,7 @@ export default defineConfig(({mode}) => {
         ],
         resolve: {
             alias: {
-                '@': path.resolve(__dirname, 'src')
+                '@': path.resolve(fileURLToPath(new URL('.', import.meta.url)), 'src')
             }
         },
         build: {

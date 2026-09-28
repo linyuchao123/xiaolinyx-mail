@@ -1,5 +1,5 @@
 <template>
-  <div style="padding: 0 15px;cursor: pointer" @click="toggleClick">
+  <div class="hamburger-trigger" @click="toggleClick">
     <svg
       :class="{'is-active':isActive}"
       class="hamburger"
@@ -29,6 +29,8 @@ const toggleClick = () => {
 </script>
 
 <style scoped>
+.hamburger-trigger { padding: 0 15px; cursor: pointer; }
+@media (max-width: 767px) { .hamburger-trigger { padding: 0 7px; } }
 .hamburger {
   display: inline-block;
   vertical-align: middle;

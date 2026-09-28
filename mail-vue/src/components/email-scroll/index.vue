@@ -1,5 +1,5 @@
 <template>
-  <div class="email-container">
+  <div class="email-container" :class="{ 'email-container--inbox': inboxDesign }">
     <div class="header-actions">
       <el-checkbox
           v-model="checkAll"
@@ -120,7 +120,7 @@
                            :showUserInfo="showUserInfo"
                            :type="type"/>
             <div class="noLoading" v-else-if="item.expand === 'noMoreData'">
-              <div>{{ $t('noMoreData') }}</div>
+              <div v-if="!inboxDesign || emailList.length > 4">{{ inboxDesign ? $t('inboxAllCaughtUp') : $t('noMoreData') }}</div>
             </div>
           </template>
         </UseVirtualList>
@@ -140,6 +140,11 @@
                        :type="type"/>
       <div class="empty" v-if="noLoading && emailList.length === 0 && !loading">
         <el-empty :image-size="isMobile ? 120 : null" :description="$t('noMessagesFound')"/>
+      </div>
+      <div class="inbox-quiet-space" v-if="inboxDesign && noLoading && emailList.length > 0 && emailList.length <= 4 && !loading">
+        <span class="inbox-quiet-icon"><Icon icon="solar:letter-opened-linear" width="37" height="37" /></span>
+        <strong>{{ $t('inboxQuietTitle') }}</strong>
+        <span>{{ $t('inboxQuietDesc') }}</span>
       </div>
     </div>
     <el-dropdown
@@ -295,6 +300,10 @@ const props = defineProps({
   showUnread: {
     type: Boolean,
     default: false
+  },
+  inboxDesign: {
+    type: Boolean,
+    default: false
   }
 })
 
@@ -371,16 +380,20 @@ onMounted(() => {
       email.formatCreateTime = fromNow(email.createTime);
     })
   }, 1000 * 60);
+  window.addEventListener('resize', handleResize)
+  window.addEventListener('wheel', handleWheel)
 })
 
 onUnmounted(() => {
   clearInterval(timer)
+  window.removeEventListener('resize', handleResize)
+  window.removeEventListener('wheel', handleWheel)
 })
 
 getEmailList()
 
-window.onresize = () => {
-  isMobile.value = innerWidth < 1367
+function handleResize() {
+  isMobile.value = window.innerWidth < 1367
 }
 
 function onScroll(e) {
@@ -397,6 +410,9 @@ const list = computed(() => {
 })
 
 const itemHeight = computed(() => {
+    if (props.inboxDesign) {
+      return isMobile.value ? 86 : 64;
+    }
     if (props.type === 'all-email') {
       return isMobile.value ? 132 : 65;
     } else  {
@@ -483,11 +499,11 @@ watch(() => emailStore.addStarEmailId, () => {
   })
 })
 
-window.addEventListener('wheel', (event) => {
+function handleWheel() {
   if (dropdownShow.value) {
-    dropdownRef.value.handleClose();
+    dropdownRef.value?.handleClose();
   }
-})
+}
 
 function openReply(email) {
   const fullEmail = emailStore.detailMap[email.emailId]
@@ -915,6 +931,7 @@ function loadData() {
   margin: 0;
   height: 100%;
   overflow: hidden;
+  position: relative;
 
   .virtual {
     will-change: scroll-position;
@@ -934,6 +951,41 @@ function loadData() {
     align-items: center;
     padding: 15px 0 0 0;
     color: var(--secondary-text-color);
+  }
+
+  .inbox-quiet-space {
+    position: absolute;
+    top: clamp(250px, 35%, 390px);
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    width: min(280px, 76%);
+    color: #8393a8;
+    text-align: center;
+    font-size: 12px;
+    pointer-events: none;
+  }
+
+  .inbox-quiet-space strong {
+    color: #4d617d;
+    font-size: 14px;
+    font-weight: 700;
+  }
+
+  .inbox-quiet-icon {
+    display: grid;
+    place-items: center;
+    width: 76px;
+    height: 76px;
+    margin-bottom: 6px;
+    border: 1px solid #e0e9f5;
+    border-radius: 24px;
+    background: radial-gradient(circle at 32% 24%, #fff, #edf4fd);
+    color: #7498cc;
+    box-shadow: 0 13px 30px rgba(52, 90, 145, .07);
   }
 
   .follow-loading {
@@ -976,8 +1028,14 @@ function loadData() {
   cursor: pointer;
   align-items: center;
   position: relative;
-  transition: background 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+  transition: background .18s ease, box-shadow .18s ease, transform .18s ease;
   height: 48px;
+  @media (hover: hover) {
+    &:hover {
+      background: var(--email-hover-background);
+      box-shadow: inset 3px 0 0 var(--el-color-primary), var(--header-actions-border);
+    }
+  }
   @media (max-width: 1366px) {
     height: 83px;
   }

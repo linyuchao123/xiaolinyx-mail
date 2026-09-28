@@ -27,7 +27,7 @@ html, body {
 }
 
 body {
-    font-family: Inter, "Helvetica Neue", Helvetica, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", "微软雅黑", Arial, sans-serif;
+    font-family: "SF Pro Display", "SF Pro Text", "PingFang SC", "Helvetica Neue", Arial, sans-serif;
     line-height: 1.5;
     color: var(--el-text-color-primary);
     font-size: 14px;
@@ -55,8 +55,9 @@ button, input, select, textarea {
     background: none;
 }
 
-*:focus {
-    outline: none;
+*:focus-visible {
+    outline: 2px solid var(--el-color-primary);
+    outline-offset: 2px;
 }
 
 .el-message {
@@ -106,20 +107,20 @@ button, input, select, textarea {
 }
 
 :root {
-    --el-color-primary: #1890ff;
-    --el-color-primary-dark-2: #1064c0;
-    --el-color-primary-light-3: #4dabff;
-    --el-color-primary-light-5: #69c0ff;
-    --el-color-primary-light-7: #91d5ff;
-    --el-color-primary-light-9: #e6f7ff;
+    --el-color-primary: #215bd6;
+    --el-color-primary-dark-2: #1645aa;
+    --el-color-primary-light-3: #5f88e2;
+    --el-color-primary-light-5: #8ca9eb;
+    --el-color-primary-light-7: #b8ccf4;
+    --el-color-primary-light-9: #edf3ff;
 
     --extra-light-fill: #FAFCFF;
     --settings-page-background: #fafbfc;
     --light-ill: #F5F7FA;
     --light-border: #E4E7ED;
     --header-actions-border: inset 0 -1px 0 0 var(--el-border-color-lighter);
-    --aside-backgound: #191A23;
-    --aside-menu-active-background: #27282D;
+    --aside-backgound: #111a2a;
+    --aside-menu-active-background: #28456f;
     --loadding-background: rgba(255, 255, 255, 0.8);
     --dark-border: #CDD0D6;
     --base-fill: #F0F2F5;
@@ -129,7 +130,7 @@ button, input, select, textarea {
     --choose-account-background: var(--el-color-primary-light-8);
     --el-text-color-regular: var(--el-text-color-primary);
     --email-scroll-content-color: rgba(25, 41, 59, 0.4);
-    --email-hover-background: #F2F6FC;
+    --email-hover-background: #f1f5fc;
     --email-right-click-background: #FDF6EC;
     --login-border: none;
     --form-desc-color: #71717a;
@@ -146,12 +147,15 @@ button, input, select, textarea {
 }
 
 .dark {
+    --el-color-primary: #81a9ff;
+    --el-color-primary-dark-2: #5c8cf3;
+    --el-color-primary-light-9: #1b2d4a;
     --extra-light-fill: #191919;
     --settings-page-background: var(--extra-light-fill);
     --light-ill: #262727;
     --light-border: #414243;
-    --aside-backgound: #141414;
-    --aside-menu-active-background: rgba(255, 255, 255, 0.08);
+    --aside-backgound: #0b1220;
+    --aside-menu-active-background: #233c64;
     --header-actions-border: inset 0 -1px 0 0 var(--el-border-color-lighter);
     --loadding-background: rgba(0, 0, 0, 0.3);
     --dark-border: #636466;
@@ -161,7 +165,7 @@ button, input, select, textarea {
     --aside-right-border: 3px 0 5px #0A0A0A;
     --choose-account-background: #39393A;
     --email-scroll-content-color: rgba(255, 255, 255, 0.3);
-    --email-hover-background: #1D1E1F;
+    --email-hover-background: #202b3c;
     --email-right-click-background: var(--email-hover-background);
     --login-border: none;
     --form-desc-color: #8D9095;
@@ -171,6 +175,47 @@ button, input, select, textarea {
     --secondary-text-color: #A3A6AD;
     --message-block-color: rgba(30, 30, 30, 0.2);
     --el-border-color: #414243 !important;
+}
+
+/* One consistent surface and interaction language across mailbox views. */
+.el-button,
+.el-input__wrapper,
+.el-input-tag__wrapper,
+.el-select__wrapper,
+.el-dialog,
+.el-popper {
+    border-radius: 10px;
+}
+
+.el-button,
+.el-input__wrapper,
+.el-input-tag__wrapper,
+.el-select__wrapper {
+    transition: background-color 180ms ease, border-color 180ms ease,
+        box-shadow 180ms ease, transform 180ms ease;
+}
+
+@media (hover: hover) {
+    .el-button:not(.is-disabled):hover {
+        transform: translateY(-1px);
+    }
+}
+
+.el-button:active:not(.is-disabled) {
+    transform: translateY(0) scale(.985);
+}
+
+@media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+        animation-duration: .01ms !important;
+        animation-iteration-count: 1 !important;
+        scroll-behavior: auto !important;
+        transition-duration: .01ms !important;
+    }
+    ::view-transition-old(root),
+    ::view-transition-new(root) {
+        animation: none !important;
+    }
 }
 
 .el-input {

@@ -2,6 +2,18 @@
   <div class="box">
     <div class="container">
       <div class="title">{{$t('profile')}}</div>
+      <div class="avatar-setting">
+        <UserAvatar :src="userStore.user.uploadedAvatar" :name="userStore.user.name" :email="userStore.user.email" :size="72" />
+        <div class="avatar-copy">
+          <strong>{{ $t('profilePhoto') }}</strong>
+          <span>{{ $t('profilePhotoHint') }}</span>
+          <div class="avatar-actions">
+            <el-button type="primary" :loading="avatarLoading" @click="avatarInput?.click()">{{ $t('uploadPhoto') }}</el-button>
+            <el-button v-if="userStore.user.uploadedAvatar" :disabled="avatarLoading" @click="removeAvatar">{{ $t('removePhoto') }}</el-button>
+          </div>
+        </div>
+        <input ref="avatarInput" class="file-input" type="file" accept="image/*,.heic,.heif" @change="handleAvatarFile" />
+      </div>
       <div class="item">
         <div>{{$t('username')}}</div>
         <div>
@@ -62,7 +74,9 @@
 </template>
 <script setup>
 import {reactive, ref, defineOptions} from 'vue'
-import {resetPassword, userDelete} from "@/request/my.js";
+import {resetPassword, userDelete, uploadAvatar, deleteAvatar} from "@/request/my.js";
+import UserAvatar from '@/components/user-avatar/index.vue'
+import { prepareAvatar, avatarDataUrl } from '@/utils/avatar.js'
 import {useUserStore} from "@/store/user.js";
 import router from "@/router/index.js";
 import {accountSetName} from "@/request/account.js";
@@ -78,6 +92,45 @@ const setPwdLoading = ref(false)
 const setNameShow = ref(false)
 const accountName = ref(null)
 const langSelect = ref(settingStore.lang)
+const avatarInput = ref(null)
+const avatarLoading = ref(false)
+
+async function handleAvatarFile(event) {
+  const file = event.target.files?.[0]
+  event.target.value = ''
+  if (!file) return
+  avatarLoading.value = true
+  let prepared
+  try {
+    prepared = await prepareAvatar(file)
+  } catch {
+    ElMessage.error(t('profilePhotoInvalid'))
+    avatarLoading.value = false
+    return
+  }
+  try {
+    const { avatarUrl } = await uploadAvatar(prepared)
+    userStore.user.uploadedAvatar = await avatarDataUrl(prepared).catch(() => avatarUrl)
+    ElMessage.success(t('profilePhotoSaved'))
+  } catch {
+    ElMessage.error(t('reqFailErrorMsg'))
+  } finally {
+    avatarLoading.value = false
+  }
+}
+
+async function removeAvatar() {
+  avatarLoading.value = true
+  try {
+    await deleteAvatar()
+    userStore.user.uploadedAvatar = null
+    ElMessage.success(t('profilePhotoRemoved'))
+  } catch (error) {
+    ElMessage.error(t('reqFailErrorMsg'))
+  } finally {
+    avatarLoading.value = false
+  }
+}
 
 defineOptions({
   name: 'setting'
@@ -208,91 +261,29 @@ function submitPwd() {
 
 </script>
 <style scoped lang="scss">
-.box {
-  padding: 40px 40px;
-
-  @media (max-width: 767px) {
-    padding: 30px 30px;
-  }
-
-  .update-pwd {
-    display: flex;
-    flex-direction: column;
-    gap: 15px;
-  }
-
-  .title {
-    font-size: 18px;
-    font-weight: bold;
-  }
-
-  .container {
-    font-size: 14px;
-    display: grid;
-    gap: 20px;
-    margin-bottom: 40px;
-
-    .item {
-      display: grid;
-      grid-template-columns: 50px 1fr;
-      gap: 140px;
-      position: relative;
-      .user-name {
-        display: grid;
-        grid-template-columns: auto 1fr;
-        span:first-child {
-          overflow: hidden;
-          white-space: nowrap;
-          text-overflow: ellipsis;
-        }
-      }
-
-      .edit-name-input {
-        position: absolute;
-        bottom: -6px;
-        .el-input {
-          width: min(200px,calc(100vw - 222px));
-        }
-      }
-
-      .edit-name {
-        color: #4dabff;
-        padding-left: 10px;
-        cursor: pointer;
-      }
-
-      @media (max-width: 767px) {
-        gap: 70px;
-      }
-
-      div:first-child {
-        font-weight: bold;
-      }
-
-      div:last-child {
-        overflow: hidden;
-        white-space: nowrap;
-        text-overflow: ellipsis;
-      }
-    }
-  }
-
-  .language {
-    display: flex;
-    flex-direction: column;
-    gap: 20px;
-    margin-bottom: 40px;
-
-    .language-select {
-      width: 100px;
-    }
-  }
-
-  .del-email {
-    font-size: 14px;
-    display: flex;
-    flex-direction: column;
-    gap: 20px;
-  }
-}
+.box { height: 100%; overflow: auto; padding: clamp(22px, 3vw, 42px); color: var(--el-text-color-primary); }
+.container, .language, .del-email { max-width: 780px; }
+.container { display: grid; gap: 0; }
+.title { color: var(--el-text-color-primary); font-size: 18px; font-weight: 750; letter-spacing: -.025em; margin-bottom: 20px; }
+.avatar-setting { display: flex; align-items: center; gap: 22px; padding: 8px 0 28px; border-bottom: 1px solid var(--el-border-color-light); margin-bottom: 10px; }
+.avatar-copy { display: grid; gap: 5px; color: var(--el-text-color-primary); }
+.avatar-copy strong { font-size: 15px; }
+.avatar-copy span { color: var(--regular-text-color); font-size: 13px; }
+.avatar-actions { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 9px; }
+.avatar-actions :deep(.el-button) { margin: 0; border-radius: 9px; }
+.file-input { display: none; }
+.item { display: grid; grid-template-columns: 150px minmax(0, 1fr); align-items: center; min-height: 62px; gap: 18px; border-bottom: 1px solid var(--el-border-color-lighter); font-size: 14px; }
+.item > div:first-child { font-weight: 650; color: var(--regular-text-color); }
+.item > div:last-child { min-width: 0; overflow-wrap: anywhere; }
+.user-name, .edit-name-input { display: inline-flex; align-items: center; gap: 8px; }
+.edit-name { color: #3265c5; cursor: pointer; font-weight: 650; }
+.edit-name-input :deep(.el-input) { width: min(230px, 48vw); }
+.language { margin-top: 34px; }
+.language-select { width: 155px; }
+.del-email { margin-top: 38px; border-top: 1px solid var(--el-border-color-light); padding-top: 30px; font-size: 14px; }
+.del-email .title { margin-bottom: 8px; }
+.del-email > div:last-child { margin-top: 14px; }
+.del-email :deep(.el-button) { border-radius: 9px; }
+.update-pwd { display: grid; gap: 14px; }
+@media (max-width: 600px) { .item { grid-template-columns: 95px minmax(0,1fr); } .avatar-setting { gap: 14px; align-items: flex-start; } }
 </style>

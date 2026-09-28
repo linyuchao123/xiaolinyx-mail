@@ -626,15 +626,18 @@ function close() {
   display: flex;
   align-items: center;
   justify-content: center;
+  background: rgba(10, 22, 42, .48);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
 
   .write-box {
     background: var(--el-bg-color);
     width: min(1367px, calc(100% - 80px));
-    box-shadow: var(--el-box-shadow-light);
+    box-shadow: 0 24px 80px rgba(8, 24, 48, .25);
     border: 1px solid var(--el-border-color-light);
     transition: var(--el-transition-duration);
-    padding: 15px;
-    border-radius: 8px;
+    padding: 22px;
+    border-radius: 18px;
     display: grid;
     grid-template-rows: auto 1fr;
     overflow: hidden;
@@ -653,7 +656,9 @@ function close() {
     .title {
       display: flex;
       justify-content: space-between;
-      margin-bottom: 10px;
+      margin-bottom: 18px;
+      padding-bottom: 14px;
+      border-bottom: 1px solid var(--el-border-color-light);
 
       .title-left {
         align-items: center;
@@ -692,7 +697,7 @@ function close() {
       height: 100%;
       display: grid;
       grid-template-rows: auto auto 1fr auto;
-      gap: 15px;
+      gap: 16px;
 
       .item-title {
       }

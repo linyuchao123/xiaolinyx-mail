@@ -46,6 +46,8 @@ const userService = {
 		user.permKeys = permKeys;
 		user.role = roleRow;
 		user.type = userRow.type;
+		const avatarVersion = await c.env.kv.get(`profile-avatar-meta:${userId}`);
+		user.uploadedAvatar = avatarVersion ? `/api/avatar/${userId}?v=${avatarVersion}` : null;
 
 		if (c.env.admin === userRow.email) {
 			user.role = constant.ADMIN_ROLE
@@ -114,6 +116,7 @@ const userService = {
 		await accountService.physicsDeleteByUserIds(c, userIds);
 		await oauthService.deleteByUserIds(c, userIds);
 		await orm(c).delete(user).where(inArray(user.userId, userIds)).run();
+		await Promise.all(userIds.flatMap(id => [c.env.kv.delete(`profile-avatar:${id}`), c.env.kv.delete(`profile-avatar-meta:${id}`)]));
 	},
 
 	async list(c, params) {
@@ -234,6 +237,10 @@ const userService = {
 
 			user.sendAction = sendAction;
 		}
+		await Promise.all(list.map(async userRow => {
+			const avatarVersion = await c.env.kv.get(`profile-avatar-meta:${userRow.userId}`);
+			userRow.uploadedAvatar = avatarVersion ? `/api/avatar/${userRow.userId}?v=${avatarVersion}` : null;
+		}));
 
 		return { list, total };
 	},
@@ -303,20 +310,6 @@ const userService = {
 			.where(eq(user.userId, userId))
 			.run();
 
-	},
-
-	async reserveSendCount(c, quantity, userId, limit) {
-		const result = await c.env.db.prepare(
-			'UPDATE user SET send_count = CAST(send_count AS INTEGER) + ? ' +
-			'WHERE user_id = ? AND CAST(send_count AS INTEGER) + ? <= ?'
-		).bind(quantity, userId, quantity, limit).run();
-		return result.meta?.changes === 1;
-	},
-
-	async refundSendCount(c, quantity, userId) {
-		await c.env.db.prepare(
-			'UPDATE user SET send_count = MAX(0, CAST(send_count AS INTEGER) - ?) WHERE user_id = ?'
-		).bind(quantity, userId).run();
 	},
 
 	async incrUserSendCount(c, quantity, userId) {

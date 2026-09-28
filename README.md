@@ -1,7 +1,7 @@
 <p align="center">
     <img src="doc/demo/logo.png" width="80px" />
-    <h1 align="center">Cloud Mail</h1>
-    <p align="center">基于 Cloudflare 的简约响应式邮箱服务，支持邮件发送、附件收发 🎉</p> 
+    <h1 align="center">Xiaolinyx Mail</h1>
+    <p align="center">你的名字，就是你的邮箱。基于 Cloud Mail 打造的个人邮箱服务。</p>
     <p align="center">
         简体中文 | <a href="/README-en.md" style="margin-left: 5px">English </a>
     </p>
@@ -28,16 +28,44 @@
         </a>
     </p>
 </p>
+## Xiaolinyx Mail
 
+**[打开邮箱](https://mail.xiaolinyx.me)** · [观看界面演示视频](doc/demo/xiaolinyx/overview.mov) · [查看原项目 Cloud Mail](https://github.com/maillab/cloud-mail)
+
+一个能用自己的名字创建邮箱地址的地方。你可以在这里注册 `@xiaolinyx.me` 邮箱，收发邮件、保存草稿、标记重要来信，并在个人设置里上传头像。界面适配桌面和手机，登录页的小角色会随着输入和鼠标移动做出回应。
+
+### 看看现在的界面
+
+[![Xiaolinyx Mail 登录与注册界面](doc/demo/xiaolinyx/login.png)](doc/demo/xiaolinyx/overview.mov)
+
+点击上图可打开完整操作录屏。若浏览器没有直接播放，请下载视频后观看。
+
+| 收件箱：集中查看来信 | 已发送：回顾寄出的邮件 |
+| --- | --- |
+| ![Xiaolinyx Mail 收件箱](doc/demo/xiaolinyx/inbox.png) | ![Xiaolinyx Mail 已发送](doc/demo/xiaolinyx/sent.png) |
+| 草稿箱：接着写未完成的邮件 | 星标邮件：把重要内容留在手边 |
+| ![Xiaolinyx Mail 草稿箱](doc/demo/xiaolinyx/drafts.png) | ![Xiaolinyx Mail 星标邮件](doc/demo/xiaolinyx/starred.png) |
+| 个人设置：上传头像、管理账号 | 关于作者：找到公开主页和联系方式 |
+| ![Xiaolinyx Mail 个人设置](doc/demo/xiaolinyx/settings.png) | ![Xiaolinyx Mail 关于作者](doc/demo/xiaolinyx/creator.png) |
+
+### 这版做了什么
+
+- **有自己的邮箱地址**：注册并使用 `@xiaolinyx.me` 邮箱，支持登录、收件、写信和发送。
+- **更顺手的邮件整理**：收件箱、已发送、草稿箱和星标邮件各有清晰入口。
+- **更有个人感的界面**：注册时可选择头像，登录后可在个人设置中更新；头像会同步显示在账号入口。登录页加入了会跟随交互的小角色。
+- **联系作者**：在登录页或邮箱顶部打开“关于作者”，查看 GitHub、X / Twitter、微信公众号、微信名片和 AI 交流群。
+- **手机也能使用**：页面针对窄屏重新排布，常用操作在移动端同样可用。
+
+> 本仓库基于开源项目 [Cloud Mail](https://github.com/maillab/cloud-mail) 继续开发。下面保留了原项目的介绍、截图和功能说明，方便了解基础能力与项目来源；具体可用功能以当前站点和部署配置为准。
 
 ## 项目简介
 
 只需要一个域名，就可以创建多个不同的邮箱，类似各大邮箱平台，本项目支持署到 Cloudflare Workers ，降低服务器成本，搭建自己的邮箱服务
 
-## 项目展示
+## 原项目展示
 
-- [在线演示](https://skymail.ink)<br>
-- [部署文档](https://doc.skymail.ink)<br>
+- [Cloud Mail 在线演示](https://skymail.ink)<br>
+- [Cloud Mail 部署文档](https://doc.skymail.ink)<br>
 
 | ![](/doc/demo/demo1.png) | ![](/doc/demo/demo2.png) |
 |-----------------------|-----------------------|
@@ -153,6 +181,5 @@ cloud-mail
 ## 交流
 
 [Telegram](https://t.me/cloud_mail_tg)
-
 
 

@@ -83,9 +83,9 @@ const route = useRoute();
 <style lang="scss" scoped>
 
 .title {
-  margin: 15px 10px;
-  height: 45px;
-  border-radius: 6px;
+  margin: 16px 14px 22px;
+  height: 48px;
+  border-radius: 12px;
   display: flex;
   position: relative;
   font-size: 16px;
@@ -94,8 +94,9 @@ const route = useRoute();
   justify-content: center;
   gap: 5px;
   color: #ffffff;
-  background: linear-gradient(135deg, #1890ff, #3a80dd);
-  transition: all 0.3s ease;
+  background: rgba(255, 255, 255, .08);
+  border: 1px solid rgba(255, 255, 255, .1);
+  transition: background-color .2s ease, transform .2s ease;
   max-width: 240px;
   padding: 0 10px;
   > div {
@@ -122,27 +123,35 @@ const route = useRoute();
 
 
 .manage-title {
-  margin-top: 10px;
-  padding-left: 20px;
-  color: #fff;
+  margin: 24px 0 8px;
+  padding-left: 25px;
+  color: #9fb1cd;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: .08em;
 }
 
 .el-menu-item {
-  margin: 3px 10px !important;
-  border-radius: 6px;
-  height: 36px;
-  padding: 10px !important;
+  margin: 4px 12px !important;
+  border-radius: 10px;
+  height: 42px;
+  padding: 10px 13px !important;
+  color: #b8c7dd !important;
+  transition: background-color .2s ease, color .2s ease, transform .2s ease;
 }
 
 .choose-item {
-  font-weight: 400;
+  font-weight: 650;
   background: var(--aside-menu-active-background) !important;
-  backdrop-filter: blur(4px);
+  color: #fff !important;
+  box-shadow: inset 3px 0 0 #9bc0ff;
 }
 
 @media (hover: hover) {
   .el-menu-item:hover {
-    background: rgba(255, 255, 255, 0.08) !important;
+    background: rgba(255, 255, 255, 0.1) !important;
+    color: #fff !important;
+    transform: translateX(2px);
   }
 }
 
@@ -166,6 +175,7 @@ const route = useRoute();
 .el-menu {
   border-right: 0;
   width: 260px;
+  padding-bottom: 24px;
 }
 
 :deep(.el-divider__text) {

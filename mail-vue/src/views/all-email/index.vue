@@ -90,7 +90,7 @@
 <script setup>
 import {starAdd, starCancel} from "@/request/star.js";
 import emailScroll from "@/components/email-scroll/index.vue"
-import {computed, defineOptions, reactive, ref, watch, onMounted} from "vue";
+import {computed, defineOptions, reactive, ref, watch, onMounted, onBeforeUnmount} from "vue";
 import {useEmailStore} from "@/store/email.js";
 import {
   allEmailList,
@@ -294,13 +294,21 @@ function getEmailList(emailId, size) {
   return emailStore.fetchList(full => allEmailList({emailId, size, full, ...params}))
 }
 
+let refreshActive = true
+
+onBeforeUnmount(() => {
+  refreshActive = false
+})
+
 async function latest() {
 
-  while (true) {
+  while (refreshActive) {
 
     let autoRefresh = settingStore.settings.autoRefresh;
 
     await sleep(autoRefresh > 1 ? autoRefresh * 1000 : 3000);
+
+    if (!refreshActive) break
 
     const latestId = sysEmailScroll.value.latestEmail?.emailId
 

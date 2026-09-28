@@ -4,12 +4,13 @@
       <hanburger @click="changeAside"></hanburger>
       <span class="breadcrumb-item">{{ $t(route.meta.title) }}</span>
     </div>
-    <div v-perm="'email:send'" class="writer-box" @click="openSend">
+    <button v-perm="'email:send'" type="button" class="writer-box" :aria-label="$t('send')" :title="$t('send')" @click="openSend">
       <div class="writer">
         <Icon icon="material-symbols:edit-outline-sharp" width="22" height="22"/>
       </div>
-    </div>
+    </button>
     <div class="toolbar">
+      <CreatorLinks />
       <div v-if="uiStore.dark" class="sun-icon icon-item" @click="openDark($event)">
         <Icon icon="mingcute:sun-fill"/>
       </div>
@@ -21,15 +22,13 @@
       </div>
       <el-dropdown ref="userinfoRef" @visible-change="e => userInfoShow = e" :teleported="false" popper-class="detail-dropdown">
         <div class="avatar" @click="userInfoHide" >
-          <div class="avatar-text">
-            <div>{{ formatName(userStore.user.email) }}</div>
-          </div>
+          <UserAvatar :src="userStore.user.uploadedAvatar" :email="userStore.user.email" :size="32" />
           <Icon class="setting-icon" icon="mingcute:down-small-fill" width="24" height="24"/>
         </div>
         <template #dropdown>
           <div class="user-details">
             <div class="details-avatar">
-              {{ formatName(userStore.user.email) }}
+              <UserAvatar :src="userStore.user.uploadedAvatar" :email="userStore.user.email" :size="42" />
             </div>
             <div class="user-name">
               {{ userStore.user.name }}
@@ -85,6 +84,8 @@ import {useSettingStore} from "@/store/setting.js";
 import {hasPerm} from "@/perm/perm.js"
 import {useI18n} from "vue-i18n";
 import {setExtend} from "@/utils/day.js"
+import UserAvatar from '@/components/user-avatar/index.vue'
+import CreatorLinks from '@/components/creator-links/index.vue'
 
 const {t} = useI18n();
 const route = useRoute();
@@ -250,10 +251,6 @@ function clickLogout() {
   })
 }
 
-function formatName(email) {
-  return email[0]?.toUpperCase() || ''
-}
-
 </script>
 <style>
 .detail-dropdown {
@@ -343,14 +340,11 @@ function formatName(email) {
     margin-top: 20px;
     height: 40px;
     width: 40px;
-    background: var(--el-bg-color);
-    color: var(--el-text-color-primary);
-    border: 1px solid var(--dark-border);
-    font-size: 18px;
+    background: transparent;
     display: flex;
     align-items: center;
     justify-content: center;
-    border-radius: 10px;
+    border-radius: 12px;
   }
 }
 
@@ -359,9 +353,19 @@ function formatName(email) {
   text-align: right;
   font-size: 12px;
   display: grid;
+  align-items: center;
   height: 100%;
-  gap: 10px;
+  gap: 16px;
   grid-template-columns: auto auto 1fr;
+  padding: 0 16px 0 8px;
+  @media (max-width: 767px) {
+    gap: 8px;
+    padding: 0 8px;
+  }
+  @media (max-width: 360px) {
+    gap: 4px;
+    padding: 0 6px;
+  }
 }
 
 .header.not-send {
@@ -376,12 +380,13 @@ function formatName(email) {
   margin-left: 5px;
 
   .writer {
-    width: 34px;
-    height: 34px;
-    border-radius: 50%;
+    width: 38px;
+    height: 38px;
+    border-radius: 11px;
     color: #ffffff;
-    background: linear-gradient(135deg, #1890ff, #3a80dd);
-    transition: all 0.3s ease;
+    background: #215bd6;
+    box-shadow: 0 5px 14px rgba(33, 91, 214, .2);
+    transition: transform .2s ease, box-shadow .2s ease;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -391,6 +396,13 @@ function formatName(email) {
       font-size: 14px;
       font-weight: bold;;
     }
+  }
+  @media (max-width: 360px) {
+    .writer { width: 34px; height: 34px; }
+  }
+  &:hover .writer {
+    transform: translateY(-2px);
+    box-shadow: 0 9px 20px rgba(33, 91, 214, .28);
   }
 }
 
@@ -402,40 +414,50 @@ function formatName(email) {
 }
 
 .breadcrumb-item {
-  font-weight: bold;
-  font-size: 14px;
+  font-weight: 700;
+  font-size: 16px;
+  letter-spacing: -.02em;
   color: var(--el-text-color-primary);
   overflow: hidden;
   white-space: nowrap;
   text-overflow: ellipsis;
+  @media (max-width: 360px) {
+    max-width: 44px;
+    font-size: 14px;
+  }
 }
 
 .toolbar {
   display: flex;
+  align-items: center;
   justify-content: end;
   gap: 15px;
   @media (max-width: 767px) {
-    gap: 10px;
+    gap: 6px;
+  }
+  @media (max-width: 360px) {
+    gap: 4px;
   }
 
   .icon-item {
-    align-self: center;
-    width: 30px;
-    height: 30px;
-    border-radius: 4px;
+    flex: 0 0 36px;
+    width: 36px;
+    height: 36px;
+    border-radius: 10px;
     display: flex;
     align-items: center;
     justify-content: center;
     cursor: pointer;
+    transition: background-color .18s ease, transform .18s ease;
   }
 
   .icon-item:hover {
     background: var(--base-fill);
+    transform: translateY(-1px);
   }
 
   .notice {
     font-size: 22px;
-    margin-right: 4px;
   }
 
   .dark-icon {
@@ -449,6 +471,7 @@ function formatName(email) {
   .avatar {
     display: flex;
     align-items: center;
+    height: 40px;
     cursor: pointer;
 
     .avatar-text {
@@ -469,6 +492,14 @@ function formatName(email) {
       margin-right: 10px;
       bottom: 10px;
     }
+  }
+
+  @media (max-width: 767px) {
+    .icon-item { flex-basis: 32px; width: 32px; height: 32px; }
+    .avatar .setting-icon { width: 16px; height: 16px; margin-right: 0; }
+  }
+  @media (max-width: 360px) {
+    .icon-item { flex-basis: 28px; width: 28px; height: 28px; }
   }
 
 }
